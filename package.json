@@ -10,6 +10,9 @@
     "prestart": "npm run -s build",
     "test": "eslint src"
   },
+  "bin": {
+    "fake-api-server": "bin/fake-api-server"
+  },
   "eslintConfig": {
     "extends": "eslint:recommended",
     "parserOptions": {
