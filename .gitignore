@@ -1,0 +1,9 @@
+# NPM/Yarn ################################################
+node_modules
+package-lock.json
+
+# IntelliJ ################################################
+/.idea/*
+!/.idea/codeStyles
+/.idea_modules
+*.iml
