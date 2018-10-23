@@ -33,7 +33,7 @@ initializeDb( db => {
 	// internal middleware
 	app.use(middleware({ config, db }))
 
-    // webhooks router
+    // Mock router
     app.use('/mock', mocker({ config, db }))
 
 	// twilio router

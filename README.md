@@ -111,7 +111,7 @@ The response has the following format:
       "content-length": "19",
     },
     "server_date": "2018-10-23T09:56:13.888Z",
-    "webhook_name": "whatever-name-i-want",
+    "endpoint_name": "whatever-name-i-want",
     "method": "POST"
   }
 ]
@@ -155,48 +155,5 @@ You can filter with the following query parameters:
 
  * `from`: filter sender
  * `to`: filter recipient
- * `since`: filter date
- * `until`: filter date
-
-### User Event Webhooks
-
-#### Sent a fake user event to hook
-
-```
-POST /webhooks
-
-{
-  user_id: "AWUP1Ossnw9pvRbP9-aZ",
-  event: {
-    type: "login",
-    auth_type: "facebook",
-    device: "desktop",
-    date: "2018-08-06T15:22:16.688Z"
-  }
-}
-```
-
-#### Retrieve all user events hooked
-
-```
-GET /webhooks
-
-[
-  {
-    user_id: "AWUP1Ossnw9pvRbP9-aZ",
-    event: {
-      type: "login",
-      auth_type: "facebook",
-      device: "desktop",
-      date: "2018-08-06T15:22:16.688Z"
-    }
-  }
-]
-```
-
-You can filter with the following parameters:
-
- * `user_id`: filter user_id
- * `type`: filter event type
  * `since`: filter date
  * `until`: filter date

@@ -61,7 +61,7 @@ export default ({config, db}) => {
             body: req.body,
             headers: req.headers,
             server_date: new Date,
-            webhook_name: name,
+            endpoint_name: name,
             method: method
         }
         storedRequests.save(name, storedRequest)
