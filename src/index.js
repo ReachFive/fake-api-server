@@ -5,8 +5,8 @@ import morgan from 'morgan'
 import bodyParser from 'body-parser'
 import initializeDb from './db'
 import middleware from './middleware'
-import webhooks from './webhooks'
-import twilio from './twilio'
+import mocker from './api/mocker'
+import twilio from './api/twilio'
 
 import config from './config.json'
 
@@ -33,8 +33,8 @@ initializeDb( db => {
 	// internal middleware
 	app.use(middleware({ config, db }))
 
-	// webhooks router
-	app.use('/webhooks', webhooks({ config, db }))
+    // webhooks router
+    app.use('/mock', mocker({ config, db }))
 
 	// twilio router
 	app.use('/twilio', twilio({ config, db }))
