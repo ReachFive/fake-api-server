@@ -1,5 +1,3 @@
-import { check } from 'express-validator/check'
-
 /**	Creates a callback that proxies node callback style arguments to an Express Response object.
  *	@param {express.Response} res	Express HTTP Response
  *	@param {number} [status=200]	Status code to send on success
@@ -23,13 +21,7 @@ export function toRes(res, status=200) {
 export function isValidISODate(value) {
   const date = new Date(value)
   if (!date.getTime()) return false
-  return date.toISOString() === value
-}
-
-export function checkISODate(field) {
-	return check(field, 'Invalid ISO date').custom(isValidISODate)
-}
-
-export function checkOptional(field) {
-	return check(field).optional({ nullable: true })
+  /* truncate to whatever decimal the value use */
+  const iso = date.toISOString().substring(0, value.length - 1) + "Z"
+  return iso === value
 }

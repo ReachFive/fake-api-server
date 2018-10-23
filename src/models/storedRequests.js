@@ -1,9 +1,10 @@
-import {query} from "express-validator/check/index";
+import {check, query} from "express-validator/check/index";
+import {isValidISODate} from "../lib/util";
 
 
 export const storedRequestSearchValidation = [
-    query('since').optional().isInt(),
-    query('until').optional().isInt(),
+    query('since').optional().custom(isValidISODate),
+    query('until').optional().custom(isValidISODate),
     query('method').optional().isString()
 ]
 
@@ -13,15 +14,32 @@ const storedRequests = {
         const target = this.content[name] || (this.content[name] = [])
         target.unshift(value)
     },
-    get: function(name) {
-        return this.content[name] || []
+    get: function(name, filter) {
+        const forcedFilter = filter || (r => true)
+        return (this.content[name] || []).filter(forcedFilter)
     },
-    all: function() {
-        const res = []
-        for (const name in this.content) {
-            res.push(...this.content[name])
+    clear: function(name, filter) {
+        const forcedFilter = filter || (r => true)
+        this.content[name] = (this.content[name] || []).filter(r => !forcedFilter(r))
+        if (this.content[name].size > 0) {
+            delete this.content[name]
         }
-        return res
+    },
+    getAll: function(filter) {
+        const result = {}
+        for (const name in this.content) {
+            const array = this.get(name, filter)
+            console.log("test", name, filter, array, array.length)
+            if (array.length > 0) {
+                result[name] = array
+            }
+        }
+        return result
+    },
+    clearAll: function(filter) {
+        for (const name in this.content) {
+            this.clear(name, filter)
+        }
     }
 }
 

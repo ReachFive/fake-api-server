@@ -10,20 +10,44 @@ export default ({config, db}) => {
 
     /** Display everything */
     api.get('/', storedRequestSearchValidation, (req, res) => {
-        const content = storedRequests.content
-        const result = {}
-        for(const name in content) {
-            const filteredArray = content[name].filter(makeFilter(req.query))
-            if (!filteredArray.isEmpty) {
-                result[name] = filteredArray
-            }
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(422).json({errors: errors.array()})
+        } else {
+            res.json(storedRequests.getAll(makeFilter(req.query)))
         }
-        res.json(result)
+    })
+
+    /** Clear all stored requests */
+    api.delete('/', storedRequestSearchValidation, (req, res) => {
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(422).json({errors: errors.array()})
+        } else {
+            storedRequests.clearAll(makeFilter(req.query))
+            return res.status(204).json()
+        }
     })
 
     /** Display all stored requests for some name */
     api.get('/:name', storedRequestSearchValidation, (req, res) => {
-        res.json(storedRequests.get(req.params.name).filter(makeFilter(req.query)))
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(422).json({errors: errors.array()})
+        } else {
+            res.json(storedRequests.get(req.params.name, makeFilter(req.query)))
+        }
+    })
+
+    /** Clear all stored requests for some name */
+    api.delete('/:name', storedRequestSearchValidation, (req, res) => {
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(422).json({errors: errors.array()})
+        } else {
+            storedRequests.clear(req.params.name, makeFilter(req.query))
+            return res.status(204).json()
+        }
     })
 
     /** Prepare a response */
@@ -80,10 +104,10 @@ function makeFilter(filter) {
         if (filter.since || filter.until) {
             const time = request.server_date.getTime()
 
-            if (filter.since && time < filter.since) {
+            if (filter.since && time < new Date(filter.since).getTime()) {
                 return false
             }
-            if (filter.until && time > filter.until) {
+            if (filter.until && time > new Date(filter.until).getTime()) {
                 return false
             }
         }
