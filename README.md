@@ -117,6 +117,12 @@ The response has the following format:
 ]
 ```
 
+You can get the requests for all endpoints on:
+
+```
+GET /mock/whatever-name-i-want
+```
+
 ### Twilio
 
 #### Send a fake SMS
