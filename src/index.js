@@ -7,6 +7,7 @@ import initializeDb from './db'
 import middleware from './middleware'
 import mocker from './api/mocker'
 import twilio from './api/twilio'
+import version from './api/version'
 
 import config from './config.json'
 
@@ -32,6 +33,9 @@ initializeDb( db => {
 
 	// internal middleware
 	app.use(middleware({ config, db }))
+
+    // Version
+    app.use('/version', version({ config, db }))
 
     // Mock router
     app.use('/mock', mocker({ config, db }))
