@@ -1,12 +1,10 @@
-FROM alpine:3.9
-
-RUN apk add --update nodejs bash git
+FROM node:10.15.2-alpine
 
 COPY . /www
 
 WORKDIR /www
 
-RUN npm i && npm run build 
+RUN npm i
 
 ENV PORT 1090
 

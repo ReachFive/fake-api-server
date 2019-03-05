@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { validationResult } from 'express-validator/check'
 import twilioMessages, { twilioMessageValidation, twilioSearchValidation } from '../models/twilioMessages'
 
-export default ({ config, db }) => {
+export default () => {
 	let fakeId = 0
 	const api = Router()
 

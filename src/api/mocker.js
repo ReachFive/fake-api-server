@@ -5,7 +5,7 @@ import storedResponses, {storedResponseValidation} from '../models/storedRespons
 
 /** This is an API that allows you to post an expected response first, and then to have this response returned when
  * being called. */
-export default ({config, db}) => {
+export default () => {
     const api = Router()
 
     /** Display everything */

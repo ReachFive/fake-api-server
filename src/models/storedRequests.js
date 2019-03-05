@@ -1,4 +1,4 @@
-import {check, query} from "express-validator/check/index";
+import {query} from "express-validator/check/index";
 import {isValidISODate} from "../lib/util";
 
 
@@ -15,11 +15,11 @@ const storedRequests = {
         target.unshift(value)
     },
     get: function(name, filter) {
-        const forcedFilter = filter || (r => true)
+        const forcedFilter = filter || (() => true)
         return (this.content[name] || []).filter(forcedFilter)
     },
     clear: function(name, filter) {
-        const forcedFilter = filter || (r => true)
+        const forcedFilter = filter || (() => true)
         this.content[name] = (this.content[name] || []).filter(r => !forcedFilter(r))
         if (this.content[name].size > 0) {
             delete this.content[name]
