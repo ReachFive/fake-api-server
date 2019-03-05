@@ -1,18 +1,18 @@
 {
   "name": "fake-api-server",
-  "version": "0.0.0",
-  "description": "Starter project for an ES6 RESTful Express API",
+  "version": "0.2.0",
+  "description": "Fake api server mock",
+  "license": "MIT",
+  "author": "Reachfive <jeremy@reachfive.co>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ReachFive/fake-smtp-server"
+  },
+  "bugs": {
+    "url": "https://github.com/ReachFive/fake-smtp-server/issues"
+  },
+  "homepage": "https://github.com/ReachFive/fake-smtp-server#readme",
   "main": "dist",
-  "scripts": {
-    "dev": "nodemon -w src --exec \"babel-node src --presets es2015,stage-0\"",
-    "build": "babel src -s -D -d dist --presets es2015,stage-0",
-    "start": "node dist",
-    "prestart": "npm run -s build",
-    "test": "eslint src"
-  },
-  "bin": {
-    "fake-api-server": "bin/fake-api-server"
-  },
   "eslintConfig": {
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -27,31 +27,28 @@
       "no-unused-vars": 1
     }
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/developit/express-es6-rest-api.git"
+  "scripts": {
+    "build": "babel src -s -D -d dist ",
+    "start": "node dist",
+    "prestart": "npm run -s build",
+    "test": "eslint src"
   },
-  "author": "Jason Miller <jason@developit.ca>",
-  "license": "MIT",
+  "bin": {
+    "fake-api-server": "bin/fake-api-server"
+  },
   "dependencies": {
-    "body-parser": "^1.13.3",
-    "compression": "^1.5.2",
-    "cors": "^2.7.1",
-    "express": "^4.13.3",
-    "express-validator": "^5.3.0",
-    "morgan": "^1.8.0",
-    "resource-router-middleware": "^0.7.0"
+    "body-parser": "1.18.3",
+    "compression": "1.7.3",
+    "cors": "2.8.5",
+    "express": "4.16.4",
+    "express-validator": "5.3.1",
+    "morgan": "1.9.1",
+    "resource-router-middleware": "0.7.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.9.0",
-    "babel-core": "^6.9.0",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-stage-0": "^6.5.0",
-    "eslint": "^5.2.0",
-    "nodemon": "^1.9.2"
-  },
-  "bugs": {
-    "url": "https://github.com/developit/express-es6-rest-api/issues"
-  },
-  "homepage": "https://github.com/developit/express-es6-rest-api#readme"
+    "@babel/cli": "7.2.3",
+    "@babel/core": "7.3.4",
+    "@babel/preset-env": "7.3.4",
+    "eslint": "5.14.1"
+  }
 }
