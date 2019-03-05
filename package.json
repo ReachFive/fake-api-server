@@ -1,18 +1,25 @@
 {
   "name": "fake-api-server",
-  "version": "0.2.0",
-  "description": "Fake api server mock",
+  "version": "0.1.0",
+  "description": "Fake API server",
+  "author": "Reachfive",
   "license": "MIT",
-  "author": "Reachfive <jeremy@reachfive.co>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ReachFive/fake-smtp-server"
+    "url": "git+https://github.com/ReachFive/fake-api-server"
   },
   "bugs": {
-    "url": "https://github.com/ReachFive/fake-smtp-server/issues"
+    "url": "https://github.com/ReachFive/fake-api-server/issues"
   },
-  "homepage": "https://github.com/ReachFive/fake-smtp-server#readme",
+  "homepage": "https://github.com/ReachFive/fake-api-server#readme",
   "main": "dist",
+  "scripts": {
+    "build": "babel src -s -D -d dist",
+    "start": "node dist",
+    "prestart": "npm run -s build",
+    "test": "eslint src",
+    "docker": "docker build -t reachfive/fake-api-server ."
+  },
   "eslintConfig": {
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -26,12 +33,6 @@
       "no-console": 0,
       "no-unused-vars": 1
     }
-  },
-  "scripts": {
-    "build": "babel src -s -D -d dist ",
-    "start": "node dist",
-    "prestart": "npm run -s build",
-    "test": "eslint src"
   },
   "bin": {
     "fake-api-server": "bin/fake-api-server"
@@ -49,6 +50,6 @@
     "@babel/cli": "7.2.3",
     "@babel/core": "7.3.4",
     "@babel/preset-env": "7.3.4",
-    "eslint": "5.14.1"
+    "eslint": "5.15.1"
   }
 }
