@@ -43,8 +43,7 @@
     "cors": "2.8.5",
     "express": "^5.2.1",
     "express-validator": "^7.3.2",
-    "morgan": "1.9.1",
-    "resource-router-middleware": "0.7.0"
+    "morgan": "1.9.1"
   },
   "devDependencies": {
     "eslint": "5.15.1",
