@@ -14,7 +14,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            res.json(storedRequests.getAll(makeFilter(matchedData(req, { locations: ['query'] }))))
+            res.json(storedRequests.getAll(makeFilter(matchedData(req))))
         }
     })
 
@@ -24,7 +24,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            storedRequests.clearAll(makeFilter(matchedData(req, { locations: ['query'] })))
+            storedRequests.clearAll(makeFilter(matchedData(req)))
             return res.status(204).json()
         }
     })
@@ -35,7 +35,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            res.json(storedRequests.get(req.params.name, makeFilter(matchedData(req, { locations: ['query'] }))))
+            res.json(storedRequests.get(req.params.name, makeFilter(matchedData(req))))
         }
     })
 
@@ -45,7 +45,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            storedRequests.clear(req.params.name, makeFilter(matchedData(req, { locations: ['query'] })))
+            storedRequests.clear(req.params.name, makeFilter(matchedData(req)))
             return res.status(204).json()
         }
     })
