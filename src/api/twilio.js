@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { validationResult } from 'express-validator'
+import { validationResult, matchedData } from 'express-validator'
 import twilioMessages, { twilioMessageValidation, twilioSearchValidation } from '../models/twilioMessages.js'
 
 export default () => {
@@ -11,13 +11,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() })
         }
-        const filter = {
-            since: req.query.since ? parseInt(req.query.since, 10) : undefined,
-            until: req.query.until ? parseInt(req.query.until, 10) : undefined,
-            from: req.query.from,
-            to: req.query.to,
-        }
-        res.json(twilioMessages.filter(messageFilter(filter)))
+        res.json(twilioMessages.filter(messageFilter(matchedData(req, { locations: ['query'] }))))
     })
 
     api.post('/messages', twilioMessageValidation, (req, res) => {
