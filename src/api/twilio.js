@@ -11,7 +11,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() })
         }
-        res.json(twilioMessages.filter(messageFilter(matchedData(req))))
+        res.json(twilioMessages.filter(messageFilter(matchedData(req, { locations: ['query'] }))))
     })
 
     api.post('/messages', twilioMessageValidation, (req, res) => {
