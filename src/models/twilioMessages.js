@@ -7,8 +7,8 @@ export const twilioMessageValidation = [
 ]
 
 export const twilioSearchValidation = [
-    query('since').optional().isInt().toInt(),
-    query('until').optional().isInt().toInt(),
+    query('since').optional().isInt(),
+    query('until').optional().isInt(),
     query('from').optional().isString(),
     query('to').optional().isString()
 ]
