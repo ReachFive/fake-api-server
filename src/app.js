@@ -2,12 +2,12 @@ import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
 import bodyParser from 'body-parser'
-import initializeDb from './db'
-import middleware from './middleware'
-import mocker from './api/mocker'
-import twilio from './api/twilio'
-import version from './api/version'
-import config from './config.json'
+import initializeDb from './db.js'
+import middleware from './middleware/index.js'
+import mocker from './api/mocker.js'
+import twilio from './api/twilio.js'
+import version from './api/version.js'
+import config from './config.js'
 
 const app = express()
 

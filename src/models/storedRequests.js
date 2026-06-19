@@ -1,5 +1,5 @@
-import { query } from 'express-validator/check/index'
-import { isValidISODate } from '../lib/util'
+import { query } from '../lib/express-validator.js'
+import { isValidISODate } from '../lib/util.js'
 
 
 export const storedRequestSearchValidation = [

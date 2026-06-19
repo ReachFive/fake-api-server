@@ -1,6 +1,6 @@
 import http from 'http'
-import app from './app'
-import config from './config.json'
+import app from './app.js'
+import config from './config.js'
 
 const server = http.createServer(app)
 server.listen(process.env.PORT || config.port, () => {
