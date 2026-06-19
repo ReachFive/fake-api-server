@@ -15,6 +15,12 @@ PORT=1090 npm start  # Run on a specific port (default: 1090)
 
 There is no `npm run dev` watch mode — it was never implemented.
 
+## Git Workflow
+
+- **Never force-push** to any branch. If a rebase is needed, prefer a merge commit or a forward-fix commit instead.
+- **Never push directly to `master`**. All changes go through a PR.
+- **Merging into master**: squash-merge only — one clean commit per PR.
+
 ## Architecture
 
 This is a stateless, in-memory fake API server for use in integration tests. All stored data is lost on server restart.
