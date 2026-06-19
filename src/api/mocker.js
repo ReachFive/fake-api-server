@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import { validationResult } from 'express-validator'
+import { validationResult, matchedData } from 'express-validator'
 import storedRequests, {storedRequestSearchValidation} from '../models/storedRequests.js'
 import storedResponses, {storedResponseValidation} from '../models/storedResponses.js'
 
@@ -14,7 +14,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            res.json(storedRequests.getAll(makeFilter(req.query)))
+            res.json(storedRequests.getAll(makeFilter(matchedData(req, { locations: ['query'] }))))
         }
     })
 
@@ -24,7 +24,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            storedRequests.clearAll(makeFilter(req.query))
+            storedRequests.clearAll(makeFilter(matchedData(req, { locations: ['query'] })))
             return res.status(204).json()
         }
     })
@@ -35,7 +35,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            res.json(storedRequests.get(req.params.name, makeFilter(req.query)))
+            res.json(storedRequests.get(req.params.name, makeFilter(matchedData(req, { locations: ['query'] }))))
         }
     })
 
@@ -45,7 +45,7 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            storedRequests.clear(req.params.name, makeFilter(req.query))
+            storedRequests.clear(req.params.name, makeFilter(matchedData(req, { locations: ['query'] })))
             return res.status(204).json()
         }
     })
