@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import {validationResult} from '../lib/express-validator.js'
+import { validationResult } from 'express-validator'
 import storedRequests, {storedRequestSearchValidation} from '../models/storedRequests.js'
 import storedResponses, {storedResponseValidation} from '../models/storedResponses.js'
 

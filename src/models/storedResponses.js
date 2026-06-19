@@ -1,4 +1,4 @@
-import { check } from '../lib/express-validator.js'
+import { check } from 'express-validator'
 
 
 export const storedResponseValidation = [
