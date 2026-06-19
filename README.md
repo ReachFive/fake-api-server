@@ -4,10 +4,7 @@
 ## Install dependencies
 npm install
 
-## Start development live-reload server
-PORT=1090 npm run dev
-
-## Start production server:
+## Start server
 PORT=1090 npm start
 
 ## Endpoints
