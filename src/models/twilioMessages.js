@@ -1,4 +1,4 @@
-import { check, query } from '../lib/express-validator.js'
+import { check, query } from 'express-validator'
 
 export const twilioMessageValidation = [
     check('To').isString(),

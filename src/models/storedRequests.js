@@ -1,4 +1,4 @@
-import { query } from '../lib/express-validator.js'
+import { query } from 'express-validator'
 import { isValidISODate } from '../lib/util.js'
 
 

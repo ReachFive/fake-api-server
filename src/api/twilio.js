@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { validationResult } from '../lib/express-validator.js'
+import { validationResult } from 'express-validator'
 import twilioMessages, { twilioMessageValidation, twilioSearchValidation } from '../models/twilioMessages.js'
 
 export default () => {
