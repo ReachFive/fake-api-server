@@ -38,7 +38,7 @@
     "fake-api-server": "bin/fake-api-server"
   },
   "dependencies": {
-    "body-parser": "1.18.3",
+    "body-parser": "1.20.5",
     "compression": "1.7.3",
     "cors": "2.8.5",
     "express": "^5.2.1",
