@@ -23,15 +23,15 @@
   "eslintConfig": {
     "extends": "eslint:recommended",
     "parserOptions": {
-      "ecmaVersion": 7,
+      "ecmaVersion": 9,
       "sourceType": "module"
     },
     "env": {
       "node": true
     },
     "rules": {
-      "no-console": 0,
-      "no-unused-vars": 1
+      "no-console": "warn",
+      "no-unused-vars": "error"
     }
   },
   "bin": {

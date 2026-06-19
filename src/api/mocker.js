@@ -57,8 +57,8 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            if (req.body.constructor === Array) storedResponses.saveMultiple(name, req.body)
-            else storedResponses.save(name, req.body)
+            if (Array.isArray(req.body)) storedResponses.saveMultiple(name, req.body)
+            else storedResponses.save(name, req.body || {})
             return res.status(204).json()
         }
     })
@@ -69,13 +69,13 @@ export default () => {
     /** Receive a POST request and return the prepared response */
     api.post('/:name/request', (req, res) => handleRequest("POST", req, res))
 
-    /** Receive a POST request and return the prepared response */
+    /** Receive a PUT request and return the prepared response */
     api.put('/:name/request', (req, res) => handleRequest("PUT", req, res))
 
-    /** Receive a POST request and return the prepared response */
+    /** Receive a PATCH request and return the prepared response */
     api.patch('/:name/request', (req, res) => handleRequest("PATCH", req, res))
 
-    /** Receive a POST request and return the prepared response */
+    /** Receive a DELETE request and return the prepared response */
     api.delete('/:name/request', (req, res) => handleRequest("DELETE", req, res))
 
     function handleRequest(method, req, res) {
@@ -84,7 +84,7 @@ export default () => {
             query: req.query,
             body: req.body,
             headers: req.headers,
-            server_date: new Date,
+            server_date: new Date(),
             endpoint_name: name,
             method: method
         }

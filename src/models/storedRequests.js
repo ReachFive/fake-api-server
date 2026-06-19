@@ -1,5 +1,5 @@
-import {query} from "express-validator/check/index";
-import {isValidISODate} from "../lib/util";
+import { query } from 'express-validator/check/index'
+import { isValidISODate } from '../lib/util'
 
 
 export const storedRequestSearchValidation = [
@@ -21,7 +21,7 @@ const storedRequests = {
     clear: function(name, filter) {
         const forcedFilter = filter || (() => true)
         this.content[name] = (this.content[name] || []).filter(r => !forcedFilter(r))
-        if (this.content[name].size > 0) {
+        if (this.content[name].length === 0) {
             delete this.content[name]
         }
     },
@@ -29,7 +29,6 @@ const storedRequests = {
         const result = {}
         for (const name in this.content) {
             const array = this.get(name, filter)
-            console.log("test", name, filter, array, array.length)
             if (array.length > 0) {
                 result[name] = array
             }
