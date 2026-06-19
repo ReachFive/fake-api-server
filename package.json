@@ -17,7 +17,7 @@
   "scripts": {
     "start": "node src/index.js",
     "test": "eslint src",
-    "docker": "docker build -t reachfive/fake-api-server ."
+    "docker": "docker build -f devops/docker/dockerfile-fakeapi -t reachfive/fake-api-server ."
   },
   "eslintConfig": {
     "extends": "eslint:recommended",
