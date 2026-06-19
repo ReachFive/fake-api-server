@@ -1,7 +1,7 @@
 import {Router} from 'express'
-import {validationResult} from 'express-validator/check'
-import storedRequests, {storedRequestSearchValidation} from '../models/storedRequests'
-import storedResponses, {storedResponseValidation} from '../models/storedResponses'
+import {validationResult} from '../lib/express-validator.js'
+import storedRequests, {storedRequestSearchValidation} from '../models/storedRequests.js'
+import storedResponses, {storedResponseValidation} from '../models/storedResponses.js'
 
 /** This is an API that allows you to post an expected response first, and then to have this response returned when
  * being called. */

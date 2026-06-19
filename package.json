@@ -12,11 +12,10 @@
     "url": "https://github.com/ReachFive/fake-api-server/issues"
   },
   "homepage": "https://github.com/ReachFive/fake-api-server#readme",
-  "main": "dist",
+  "type": "module",
+  "main": "src/index.js",
   "scripts": {
-    "build": "babel src -s -D -d dist",
-    "start": "node dist",
-    "prestart": "npm run -s build",
+    "start": "node src/index.js",
     "test": "eslint src",
     "docker": "docker build -t reachfive/fake-api-server ."
   },
@@ -47,9 +46,6 @@
     "resource-router-middleware": "0.7.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.2.3",
-    "@babel/core": "7.3.4",
-    "@babel/preset-env": "7.3.4",
     "eslint": "5.15.1"
   }
 }

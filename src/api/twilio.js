@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { validationResult } from 'express-validator/check'
-import twilioMessages, { twilioMessageValidation, twilioSearchValidation } from '../models/twilioMessages'
+import { validationResult } from '../lib/express-validator.js'
+import twilioMessages, { twilioMessageValidation, twilioSearchValidation } from '../models/twilioMessages.js'
 
 export default () => {
     let fakeId = 0
