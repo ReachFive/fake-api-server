@@ -151,6 +151,10 @@ describe('POST /mock/:name/response (array — cycling)', () => {
     })
 
     it('returns 200 empty when an empty array is posted', async () => {
+        // Known bug (storedResponses.js): posting [] causes `% 0` → index becomes NaN permanently,
+        // poisoning all subsequent calls for that name. This test currently passes only because
+        // the `|| {}` fallback in storedResponses.get() masks the NaN. Fix: guard
+        // `if (target.responses.length === 0) return {}` before the modulo.
         await request(app)
             .post('/mock/name/response')
             .send([])
