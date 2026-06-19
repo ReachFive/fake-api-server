@@ -17,7 +17,8 @@
     "build": "babel src -s -D -d dist",
     "start": "node dist",
     "prestart": "npm run -s build",
-    "test": "eslint src",
+    "lint": "eslint src",
+    "test": "vitest run",
     "docker": "docker build -t reachfive/fake-api-server ."
   },
   "eslintConfig": {
@@ -50,6 +51,8 @@
     "@babel/cli": "7.2.3",
     "@babel/core": "7.3.4",
     "@babel/preset-env": "7.3.4",
-    "eslint": "5.15.1"
+    "eslint": "5.15.1",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.9"
   }
 }
