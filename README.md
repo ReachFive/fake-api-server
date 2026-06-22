@@ -1,22 +1,56 @@
 # Fake API Server
 
+A stateless, in-memory fake API server for use in integration tests.
 
-## Install dependencies
+## Install & run
+
+```bash
 npm install
+npm start                 # default port 1090
+PORT=3000 npm start       # custom port
+ENABLE_UI=true npm start  # enable the admin UI at /ui
+```
 
-## Start server
-PORT=1090 npm start
+## Docker
+
+The image is published to Docker Hub as [`reachfive/fake-api-server`](https://hub.docker.com/r/reachfive/fake-api-server).
+
+```bash
+docker run -p 1090:1090 reachfive/fake-api-server
+```
+
+### Environment variables
+
+| Variable     | Default | Description                          |
+|--------------|---------|--------------------------------------|
+| `PORT`       | `1090`  | Port the server listens on           |
+| `ENABLE_UI`  | _(off)_ | Set to `true` to serve the admin UI at `/ui` |
+
+```bash
+docker run -p 1090:1090 -e ENABLE_UI=true reachfive/fake-api-server
+```
+
+### Docker Compose
+
+```yaml
+services:
+  fake-api:
+    image: reachfive/fake-api-server
+    ports:
+      - "1090:1090"
+    environment:
+      - ENABLE_UI=true
+```
 
 ## Endpoints
 
-### Basic Mock
+### Mock record & replay
 
-The basic mock allows you to send a request to an arbitrary named endpoint, then checked what was received.
-You can also specify in advance what the response should be.
+Configure a canned response, point your app under test at the mock endpoint, then inspect what it sent.
 
-#### Send a request
+#### Send a request
 
-All frequent HTTP methods are possible: GET, POST, PATCH, PUT, DELETE. Use them on `/request` under whatever name you want.
+All common HTTP methods are accepted: `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.
 
 ```
 POST /mock/whatever-name-i-want/request?some=parameter
@@ -28,13 +62,9 @@ POST /mock/whatever-name-i-want/request?some=parameter
 }
 ```
 
-By default, you will receive an empty 200 response.
+By default you receive an empty `200` response.
 
-#### Setup a response
-
-To set the response your call should receive, send them on `/response` under whatever name you want.
-The body is a JSON with three optional fields describing what response should be sent.
-If a field is empty, the default value will be used.
+#### Set up a response
 
 ```
 POST /mock/whatever-name-i-want/response
@@ -50,62 +80,42 @@ POST /mock/whatever-name-i-want/response
 }
 ```
 
-You can also post an array of responses, and the endpoint will cycle through them.
+You can also POST an array of responses; the endpoint will cycle through them in order.
 
 ```
 POST /mock/whatever-name-i-want/response
 
 [
-  {
-    "status": 417,
-    "payload": {
-      "error_message": "Sorry Mr. Wayne, I'm just a teapot"
-    },
-    "headers": {
-      "some-kind-of-header": "auie,ctsrnm"
-    }
-  },
-  {
-    "status": 200,
-    "payload": {
-      "confirmation": true
-    }
-  }
+  { "status": 417, "payload": { "error_message": "Sorry Mr. Wayne, I'm just a teapot" } },
+  { "status": 200, "payload": { "confirmation": true } }
 ]
 ```
 
-#### Get stored requests
-
-To get all requests stored for some name:
+#### Get stored requests
 
 ```
 GET /mock/whatever-name-i-want
 ```
 
-You can filter with the following query parameters:
+Query parameters:
 
- * `method`: HTTP method used
- * `since`: requests received after some time (as an epoch timestamp in milliseconds)
- * `until`: requests received before some time (as an epoch timestamp in milliseconds)
+- `method` — filter by HTTP method
+- `since` — requests received after this time (ISO 8601 or epoch ms)
+- `until` — requests received before this time (ISO 8601 or epoch ms)
 
-The response has the following format:
+Response:
 
 ```json
 [
   {
-    "query": {
-      "some": "parameter"
-    },
+    "query": { "some": "parameter" },
     "body": {
       "name": "Bruce Wayne",
       "affiliation": "Wayne Enterprises",
       "hobby": "Dressing like a bat"
     },
     "headers": {
-      "content-type": "application/json",
-      "accept": "*/*",
-      "accept-encoding": "gzip, deflate",
-      "content-length": "19",
+      "content-type": "application/json"
     },
     "server_date": "2018-10-23T09:56:13.888Z",
     "endpoint_name": "whatever-name-i-want",
@@ -114,11 +124,15 @@ The response has the following format:
 ]
 ```
 
-You can get the requests for all endpoints on:
+#### Get all stored requests
+
+Returns a map of all endpoint names to their request arrays.
 
 ```
-GET /mock/whatever-name-i-want
+GET /mock/
 ```
+
+---
 
 ### Twilio
 
@@ -134,23 +148,51 @@ POST /twilio/messages
 }
 ```
 
-#### Retrieve all SMS sent
+#### Retrieve SMS
 
 ```
 GET /twilio/messages
+```
 
+Query parameters:
+
+- `from` — filter by sender
+- `to` — filter by recipient
+- `since` — filter by date (ISO 8601 or epoch ms)
+- `until` — filter by date (ISO 8601 or epoch ms)
+
+Response:
+
+```json
 [
   {
+    "sid": "SM_abc123",
     "To": "+33606060606",
     "From": "+33101010101",
-    "Body": "Your verification code is 123456"
+    "Body": "Your verification code is 123456",
+    "date_created": "2018-10-23T09:56:13.888Z"
   }
 ]
 ```
 
-You can filter with the following query parameters:
+---
 
- * `from`: filter sender
- * `to`: filter recipient
- * `since`: filter date
- * `until`: filter date
+### Version
+
+```
+GET /version/
+```
+
+Returns the server version from `package.json`.
+
+---
+
+## Admin UI
+
+An optional read-only admin UI is available at `/ui`. Enable it with:
+
+```bash
+ENABLE_UI=true npm start
+```
+
+The UI lets you browse captured Twilio messages and mock requests directly in a browser. It is disabled by default and has no effect on the API.

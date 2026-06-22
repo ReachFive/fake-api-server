@@ -4,17 +4,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+### Server
 ```bash
-npm install          # Install dependencies
-npm start            # Run directly (node src/index.js — no build step)
-npm run dev          # Run with file watching (node --watch)
-npm test             # Run Vitest test suite
-npm run lint         # Run ESLint on src/
-npm run docker       # Build Docker image (devops/docker/dockerfile-fakeapi)
-PORT=1090 npm start  # Run on a specific port (default: 1090)
+npm install               # Install dependencies
+npm start                 # Run directly (node src/index.js — no build step)
+npm run dev               # Run with file watching (node --watch)
+npm test                  # Run Vitest test suite
+npm run lint              # Run ESLint on src/
+npm run docker            # Build Docker image (devops/docker/dockerfile-fakeapi)
+PORT=1090 npm start       # Run on a specific port (default: 1090)
+ENABLE_UI=true npm start  # Enable the admin UI at /ui (disabled by default)
 ```
 
 No build step — the project runs native ESM directly from `src/`. Use `npm run dev` for watch mode during local development.
+
+### Admin UI (`ui/`)
+```bash
+cd ui && npm install   # Install UI dependencies (separate workspace)
+cd ui && npm run dev   # Vite dev server (proxies API to localhost:1090)
+cd ui && npm run build # Build to ui/dist/ (required before ENABLE_UI=true works)
+cd ui && npm run lint  # ESLint
+```
+
+The UI is a separate Vite/React/TypeScript workspace under `ui/`. It has its own `package.json`, `tsconfig.json`, and ESLint config. `ui/dist/` is served by Express when `ENABLE_UI=true`; the Docker multi-stage build produces it automatically.
 
 ## Git Workflow
 
@@ -34,7 +46,7 @@ This is a stateless, in-memory fake API server for use in integration tests. All
 src/
   app.js        — Express app factory (exported for tests)
   index.js      — thin HTTP server entry point
-  config.js     — port, bodyLimit, corsHeaders
+  config.js     — port, bodyLimit, corsHeaders, enableUI (reads env vars)
   api/
     mocker.js   — /mock routes
     twilio.js   — /twilio routes
@@ -45,6 +57,12 @@ src/
     twilioMessages.js   — array, filter by since/until/to/from
   lib/
     util.js     — isValidISODate()
+ui/             — React/TypeScript admin UI (separate Vite workspace)
+  src/
+    routes/     — TanStack Router file-based routes
+    lib/api.ts  — typed API client
+    components/ — Shadcn UI components
+  dist/         — built output, served by Express when ENABLE_UI=true
 ```
 
 ### Request/Response lifecycle (`/mock`)
@@ -58,11 +76,12 @@ The router (`src/api/mocker.js`) captures any HTTP method on `/:name/request`, s
 
 ### Routes
 
-| Prefix     | File                     | Purpose                              |
-|------------|--------------------------|--------------------------------------|
-| `/mock`    | `src/api/mocker.js`      | Generic mock record-and-playback     |
-| `/twilio`  | `src/api/twilio.js`      | Fake Twilio SMS store                |
-| `/version` | `src/api/version.js`     | Returns `version` from `package.json` |
+| Prefix     | File                     | Purpose                                          |
+|------------|--------------------------|--------------------------------------------------|
+| `/mock`    | `src/api/mocker.js`      | Generic mock record-and-playback                 |
+| `/twilio`  | `src/api/twilio.js`      | Fake Twilio SMS store                            |
+| `/version` | `src/api/version.js`     | Returns `version` from `package.json`            |
+| `/ui`      | `src/app.js`             | Admin UI (static + SPA fallback; requires `ENABLE_UI=true`) |
 
 ### Validation
 
