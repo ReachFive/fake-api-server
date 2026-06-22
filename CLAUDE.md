@@ -7,13 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm install          # Install dependencies
 npm start            # Run directly (node src/index.js — no build step)
+npm run dev          # Run with file watching (node --watch)
 npm test             # Run Vitest test suite
 npm run lint         # Run ESLint on src/
 npm run docker       # Build Docker image (devops/docker/dockerfile-fakeapi)
 PORT=1090 npm start  # Run on a specific port (default: 1090)
 ```
 
-There is no `npm run dev` watch mode and no build step — the project runs native ESM directly from `src/`.
+No build step — the project runs native ESM directly from `src/`. Use `npm run dev` for watch mode during local development.
 
 ## Git Workflow
 
