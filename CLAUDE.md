@@ -6,14 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm install          # Install dependencies
-npm run build        # Compile src/ → dist/ via Babel
-npm start            # Build then run (node dist)
-npm test             # Run ESLint on src/ (no unit test framework exists)
-npm run docker       # Build Docker image
+npm start            # Run directly (node src/index.js — no build step)
+npm test             # Run Vitest test suite
+npm run lint         # Run ESLint on src/
+npm run docker       # Build Docker image (devops/docker/dockerfile-fakeapi)
 PORT=1090 npm start  # Run on a specific port (default: 1090)
 ```
 
-There is no `npm run dev` watch mode — it was never implemented.
+There is no `npm run dev` watch mode and no build step — the project runs native ESM directly from `src/`.
 
 ## Git Workflow
 
@@ -25,7 +25,26 @@ There is no `npm run dev` watch mode — it was never implemented.
 
 This is a stateless, in-memory fake API server for use in integration tests. All stored data is lost on server restart.
 
-**Source is ES6 modules; Babel compiles to CommonJS** — edit files in `src/`, run from `dist/`. The build step is baked into `prestart`.
+**Native ESM** (`"type":"module"`) — edit and run directly from `src/`. No compilation step.
+
+### Source layout
+
+```
+src/
+  app.js        — Express app factory (exported for tests)
+  index.js      — thin HTTP server entry point
+  config.js     — port, bodyLimit, corsHeaders
+  api/
+    mocker.js   — /mock routes
+    twilio.js   — /twilio routes
+    version.js  — /version route
+  models/
+    storedRequests.js   — in-memory map, newest-first
+    storedResponses.js  — in-memory map, round-robin cycling
+    twilioMessages.js   — array, filter by since/until/to/from
+  lib/
+    util.js     — isValidISODate()
+```
 
 ### Request/Response lifecycle (`/mock`)
 
@@ -44,10 +63,15 @@ The router (`src/api/mocker.js`) captures any HTTP method on `/:name/request`, s
 | `/twilio`  | `src/api/twilio.js`      | Fake Twilio SMS store                |
 | `/version` | `src/api/version.js`     | Returns `version` from `package.json` |
 
-### `db.js`
-
-`src/db.js` is a callback stub with no real database. It exists as an integration point if a persistence layer is ever added — it calls its callback immediately. All models hold state in module-level objects.
-
 ### Validation
 
-Input validation uses `express-validator` v5 (legacy check/query API from `express-validator/check`). The validator instances (`storedRequestSearchValidation`, `storedResponseValidation`, etc.) are defined alongside the models, not in the route files.
+Input validation uses `express-validator` v7. Validators are defined alongside the models (not in route files). Handlers use `matchedData(req)` to access validated params — do not read from `req.query` directly.
+
+### Testing
+
+Tests live in `test/` (Vitest + supertest). `src/app.js` exports the Express app for test imports. In test `beforeEach`, reset model state directly: `storedRequests.content` and `storedResponses.content` via assignment; `twilioMessages` array via `.splice(0)` (not reassignment — other modules hold the reference).
+
+### CI / Docker
+
+- CI: `.github/workflows/ci.yml` (lint + test + audit), `.github/workflows/publish.yml` (Docker Hub publish on tag push)
+- Docker: `devops/docker/dockerfile-fakeapi`, Node 22-alpine, non-root user, `npm ci`
