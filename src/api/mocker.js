@@ -8,6 +8,13 @@ import storedResponses, {storedResponseValidation} from '../models/storedRespons
 export default () => {
     const api = Router()
 
+    api.param('name', (req, res, next, val) => {
+        if (!/^[\w-]{1,100}$/.test(val)) {
+            return res.status(400).json({ error: 'Invalid name' })
+        }
+        next()
+    })
+
     /** Display everything */
     api.get('/', storedRequestSearchValidation, (req, res) => {
         const errors = validationResult(req)
@@ -57,7 +64,25 @@ export default () => {
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
         } else {
-            if (Array.isArray(req.body)) storedResponses.saveMultiple(name, req.body)
+            if (Array.isArray(req.body)) {
+                for (const item of req.body) {
+                    const s = item.status
+                    if (s !== undefined && (!Number.isInteger(s) || s < 200 || s > 599)) {
+                        return res.status(422).json({ error: 'Invalid status in array element: must be integer 200-599' })
+                    }
+                    if (item.headers !== undefined) {
+                        if (typeof item.headers !== 'object' || Array.isArray(item.headers)) {
+                            return res.status(422).json({ error: 'Invalid headers in array element: must be object' })
+                        }
+                        for (const [k, v] of Object.entries(item.headers)) {
+                            if (typeof k !== 'string' || typeof v !== 'string') {
+                                return res.status(422).json({ error: 'Invalid headers in array element: keys and values must be strings' })
+                            }
+                        }
+                    }
+                }
+                storedResponses.saveMultiple(name, req.body)
+            }
             else storedResponses.save(name, req.body || {})
             return res.status(204).json()
         }
@@ -83,7 +108,7 @@ export default () => {
         const storedRequest = {
             query: req.query,
             body: req.body,
-            headers: req.headers,
+            headers: obfuscateHeaders(req.headers),
             server_date: new Date(),
             endpoint_name: name,
             method: method
@@ -97,6 +122,22 @@ export default () => {
     }
 
     return api
+}
+
+const SENSITIVE_HEADERS = new Set(['authorization', 'cookie', 'x-api-key', 'x-auth-token'])
+const SCHEME_PREFIX_RE = /^(Bearer|Basic|Token|Digest)\s+/i
+
+function obfuscateHeaders(headers) {
+    const result = {}
+    for (const [key, value] of Object.entries(headers)) {
+        if (SENSITIVE_HEADERS.has(key.toLowerCase())) {
+            const match = SCHEME_PREFIX_RE.exec(value)
+            result[key] = match ? `${match[0]}[redacted]` : '[redacted]'
+        } else {
+            result[key] = value
+        }
+    }
+    return result
 }
 
 function makeFilter(filter) {

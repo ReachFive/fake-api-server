@@ -13,9 +13,9 @@ if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('dev'))
 }
 
-app.use(cors({ exposedHeaders: config.corsHeaders }))
-app.use(bodyParser.json({ limit: config.bodyLimit }))
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cors({ origin: config.corsOrigin, exposedHeaders: config.corsHeaders }))
+app.use(bodyParser.json({ limit: config.bodyLimit, inflate: false }))
+app.use(bodyParser.urlencoded({ extended: false, limit: config.bodyLimit, inflate: false }))
 
 app.use('/version', version())
 app.use('/mock', mocker())
