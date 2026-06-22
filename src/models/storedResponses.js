@@ -2,17 +2,23 @@ import { check } from 'express-validator'
 
 const MAX_ENDPOINT_NAMES = parseInt(process.env.MAX_ENDPOINT_NAMES, 10) || 500
 
+function validateHeadersShape(headers) {
+    for (const [key, val] of Object.entries(headers)) {
+        if (typeof key !== 'string' || typeof val !== 'string') {
+            throw new Error('All header keys and values must be strings')
+        }
+    }
+    return true
+}
+
 export const storedResponseValidation = [
+    // single-object body
     check('status').optional().isInt({ min: 200, max: 599 }),
     check('payload').optional(),
-    check('headers').optional().isObject().custom((headers) => {
-        for (const [key, val] of Object.entries(headers)) {
-            if (typeof key !== 'string' || typeof val !== 'string') {
-                throw new Error('All header keys and values must be strings')
-            }
-        }
-        return true
-    })
+    check('headers').optional().isObject().custom(validateHeadersShape),
+    // array body — validate each element
+    check('*.status').optional().isInt({ min: 200, max: 599 }),
+    check('*.headers').optional().isObject().custom(validateHeadersShape),
 ]
 
 const storedResponses = {
