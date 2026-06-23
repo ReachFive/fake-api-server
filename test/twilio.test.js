@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import request from 'supertest'
 import app from '../src/app'
-import twilioMessages from '../src/models/twilioMessages'
+import twilioMessages, { MAX_TWILIO_MESSAGES } from '../src/models/twilioMessages'
 
 beforeEach(() => {
     twilioMessages.splice(0)
@@ -75,5 +75,15 @@ describe('GET /version', () => {
         const res = await request(app).get('/version')
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
+    })
+})
+
+describe('security: twilio memory cap', () => {
+    it('caps stored messages at MAX_TWILIO_MESSAGES after posting', async () => {
+        for (let i = 0; i < MAX_TWILIO_MESSAGES; i++) {
+            twilioMessages.push({ to: '+1', from: '+2', body: `msg${i}`, sid: String(i), date_created: new Date().toISOString() })
+        }
+        await request(app).post('/twilio/messages').send({ To: '+1', From: '+2', Body: 'overflow' })
+        expect(twilioMessages.length).toBe(MAX_TWILIO_MESSAGES)
     })
 })
