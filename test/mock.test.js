@@ -206,8 +206,8 @@ describe('security: name validation', () => {
         expect(res.status).toBe(422)
     })
 
-    it('rejects names exceeding 100 characters via GET', async () => {
-        const longName = 'a'.repeat(101)
+    it('rejects names exceeding 255 characters via GET', async () => {
+        const longName = 'a'.repeat(256)
         const res = await request(app).get(`/mock/${longName}`)
         expect(res.status).toBe(422)
     })
@@ -237,8 +237,8 @@ describe('security: name validation', () => {
         expect(res.status).toBe(200)
     })
 
-    it('accepts names exactly 100 characters long', async () => {
-        const name = 'a'.repeat(100)
+    it('accepts names exactly 255 characters long', async () => {
+        const name = 'a'.repeat(255)
         const res = await request(app).get(`/mock/${name}`)
         expect(res.status).toBe(200)
     })

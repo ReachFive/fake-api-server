@@ -5,7 +5,7 @@ const MAX_REQUESTS_PER_NAME = parseInt(process.env.MAX_REQUESTS_PER_NAME, 10) ||
 const MAX_ENDPOINT_NAMES = parseInt(process.env.MAX_ENDPOINT_NAMES, 10) || 500
 
 export const nameValidation = [
-    param('name').matches(/^[\w-]{1,100}$/).withMessage('Invalid name')
+    param('name').matches(/^[\w-]{1,255}$/).withMessage('Invalid name')
 ]
 
 export const storedRequestSearchValidation = [
