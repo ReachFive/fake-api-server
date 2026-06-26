@@ -1,5 +1,7 @@
 import { check, query } from 'express-validator'
 
+export const MAX_TWILIO_MESSAGES = parseInt(process.env.MAX_TWILIO_MESSAGES, 10) || 10000
+
 export const twilioMessageValidation = [
     check('To').isString(),
     check('From').isString(),

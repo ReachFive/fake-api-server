@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { validationResult, matchedData } from 'express-validator'
-import twilioMessages, { twilioMessageValidation, twilioSearchValidation } from '../models/twilioMessages.js'
+import twilioMessages, { twilioMessageValidation, twilioSearchValidation, MAX_TWILIO_MESSAGES } from '../models/twilioMessages.js'
 
 export default () => {
     let fakeId = 0
@@ -28,6 +28,7 @@ export default () => {
             date_created: new Date().toISOString()
         }
         twilioMessages.unshift(result)
+        if (twilioMessages.length > MAX_TWILIO_MESSAGES) twilioMessages.length = MAX_TWILIO_MESSAGES
         return res.json(result)
     })
 

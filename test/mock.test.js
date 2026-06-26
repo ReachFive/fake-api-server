@@ -5,8 +5,8 @@ import storedRequests from '../src/models/storedRequests'
 import storedResponses from '../src/models/storedResponses'
 
 beforeEach(() => {
-    storedRequests.content = {}
-    storedResponses.content = {}
+    storedRequests.content = Object.create(null)
+    storedResponses.content = Object.create(null)
 })
 
 describe('GET /mock/:name', () => {
@@ -197,5 +197,208 @@ describe('DELETE /mock (all)', () => {
 
         const res = await request(app).get('/mock/')
         expect(res.body).toEqual({})
+    })
+})
+
+describe('security: name validation', () => {
+    it('rejects names with dots via GET', async () => {
+        const res = await request(app).get('/mock/bad.name')
+        expect(res.status).toBe(422)
+    })
+
+    it('rejects names exceeding 255 characters via GET', async () => {
+        const longName = 'a'.repeat(256)
+        const res = await request(app).get(`/mock/${longName}`)
+        expect(res.status).toBe(422)
+    })
+
+    it('rejects invalid names via DELETE', async () => {
+        const res = await request(app).delete('/mock/bad.name')
+        expect(res.status).toBe(422)
+    })
+
+    it('rejects invalid names via POST /response', async () => {
+        const res = await request(app).post('/mock/bad.name/response').send({ status: 200 })
+        expect(res.status).toBe(422)
+    })
+
+    it('rejects invalid names via POST /request', async () => {
+        const res = await request(app).post('/mock/bad.name/request').send({})
+        expect(res.status).toBe(422)
+    })
+
+    it('rejects invalid names via GET /request', async () => {
+        const res = await request(app).get('/mock/bad.name/request')
+        expect(res.status).toBe(422)
+    })
+
+    it('accepts names with word chars and hyphens', async () => {
+        const res = await request(app).get('/mock/valid-name_1')
+        expect(res.status).toBe(200)
+    })
+
+    it('accepts names exactly 255 characters long', async () => {
+        const name = 'a'.repeat(255)
+        const res = await request(app).get(`/mock/${name}`)
+        expect(res.status).toBe(200)
+    })
+})
+
+describe('security: token obfuscation', () => {
+    it('redacts authorization header completely when no scheme', async () => {
+        await request(app)
+            .post('/mock/name/request')
+            .set('authorization', 'raw-secret-token')
+
+        const res = await request(app).get('/mock/name')
+        expect(res.body[0].headers['authorization']).toBe('[redacted]')
+    })
+
+    it('preserves Bearer scheme prefix in authorization header', async () => {
+        await request(app)
+            .post('/mock/name/request')
+            .set('authorization', 'Bearer secret-jwt-token')
+
+        const res = await request(app).get('/mock/name')
+        expect(res.body[0].headers['authorization']).toBe('Bearer [redacted]')
+    })
+
+    it('preserves Basic scheme prefix in authorization header', async () => {
+        await request(app)
+            .post('/mock/name/request')
+            .set('authorization', 'Basic dXNlcjpwYXNz')
+
+        const res = await request(app).get('/mock/name')
+        expect(res.body[0].headers['authorization']).toBe('Basic [redacted]')
+    })
+
+    it('redacts cookie header', async () => {
+        await request(app)
+            .get('/mock/name/request')
+            .set('cookie', 'session=abc123; other=xyz')
+
+        const res = await request(app).get('/mock/name')
+        expect(res.body[0].headers['cookie']).toBe('[redacted]')
+    })
+
+    it('redacts x-api-key header', async () => {
+        await request(app)
+            .get('/mock/name/request')
+            .set('x-api-key', 'sk-secret')
+
+        const res = await request(app).get('/mock/name')
+        expect(res.body[0].headers['x-api-key']).toBe('[redacted]')
+    })
+
+    it('redacts x-auth-token header', async () => {
+        await request(app)
+            .get('/mock/name/request')
+            .set('x-auth-token', 'my-token')
+
+        const res = await request(app).get('/mock/name')
+        expect(res.body[0].headers['x-auth-token']).toBe('[redacted]')
+    })
+
+    it('does not redact non-sensitive headers', async () => {
+        await request(app)
+            .get('/mock/name/request')
+            .set('x-custom', 'visible-value')
+
+        const res = await request(app).get('/mock/name')
+        expect(res.body[0].headers['x-custom']).toBe('visible-value')
+    })
+})
+
+describe('security: response validation hardening', () => {
+    it('returns 422 when status is below 200', async () => {
+        const res = await request(app).post('/mock/name/response').send({ status: 100 })
+        expect(res.status).toBe(422)
+    })
+
+    it('returns 422 when status is above 599', async () => {
+        const res = await request(app).post('/mock/name/response').send({ status: 600 })
+        expect(res.status).toBe(422)
+    })
+
+    it('accepts status 200 and 599 as boundary values', async () => {
+        const r1 = await request(app).post('/mock/name/response').send({ status: 200 })
+        expect(r1.status).toBe(204)
+        const r2 = await request(app).post('/mock/name/response').send({ status: 599 })
+        expect(r2.status).toBe(204)
+    })
+
+    it('returns 422 when headers contains a non-string value', async () => {
+        const res = await request(app)
+            .post('/mock/name/response')
+            .send({ headers: { 'x-foo': 123 } })
+        expect(res.status).toBe(422)
+    })
+
+    it('returns 422 when headers is not an object', async () => {
+        const res = await request(app)
+            .post('/mock/name/response')
+            .send({ headers: 'not-an-object' })
+        expect(res.status).toBe(422)
+    })
+
+    it('returns 422 when an array item has status out of range', async () => {
+        const res = await request(app)
+            .post('/mock/name/response')
+            .send([{ status: 200 }, { status: 999 }])
+        expect(res.status).toBe(422)
+    })
+
+    it('returns 422 when an array item has non-string header value', async () => {
+        const res = await request(app)
+            .post('/mock/name/response')
+            .send([{ status: 200, headers: { 'x-foo': 42 } }])
+        expect(res.status).toBe(422)
+    })
+
+    it('accepts a valid array of responses', async () => {
+        const res = await request(app)
+            .post('/mock/name/response')
+            .send([{ status: 200, headers: { 'x-foo': 'bar' } }, { status: 404 }])
+        expect(res.status).toBe(204)
+    })
+})
+
+describe('security: memory caps', () => {
+    it('caps requests per endpoint at 1000', () => {
+        storedRequests.content['x'] = Array.from({ length: 1000 }, (_, i) => ({ n: i }))
+        storedRequests.save('x', { n: 1000 })
+        expect(storedRequests.content['x']).toHaveLength(1000)
+    })
+
+    it('does not register new endpoint names beyond 500', () => {
+        for (let i = 0; i < 500; i++) {
+            storedRequests.content[`ep${i}`] = [{ n: i }]
+        }
+        storedRequests.save('new-endpoint', { n: 0 })
+        expect(storedRequests.content['new-endpoint']).toBeUndefined()
+    })
+
+    it('still accepts new requests for existing names when at the endpoint cap', () => {
+        for (let i = 0; i < 500; i++) {
+            storedRequests.content[`ep${i}`] = [{ n: i }]
+        }
+        storedRequests.save('ep0', { n: 999 })
+        expect(storedRequests.content['ep0']).toHaveLength(2)
+    })
+
+    it('does not register new response endpoints beyond 500', () => {
+        for (let i = 0; i < 500; i++) {
+            storedResponses.content[`ep${i}`] = { responses: [{}], index: -1 }
+        }
+        storedResponses.save('new-endpoint', { status: 200 })
+        expect(storedResponses.content['new-endpoint']).toBeUndefined()
+    })
+
+    it('still accepts response saves for existing names when at the endpoint cap', () => {
+        for (let i = 0; i < 500; i++) {
+            storedResponses.content[`ep${i}`] = { responses: [{}], index: -1 }
+        }
+        storedResponses.save('ep0', { status: 201 })
+        expect(storedResponses.content['ep0'].responses[0]).toEqual({ status: 201 })
     })
 })

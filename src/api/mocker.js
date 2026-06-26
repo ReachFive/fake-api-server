@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import { validationResult, matchedData } from 'express-validator'
-import storedRequests, {storedRequestSearchValidation} from '../models/storedRequests.js'
+import storedRequests, {nameValidation, storedRequestSearchValidation} from '../models/storedRequests.js'
 import storedResponses, {storedResponseValidation} from '../models/storedResponses.js'
 
 /** This is an API that allows you to post an expected response first, and then to have this response returned when
@@ -30,7 +30,7 @@ export default () => {
     })
 
     /** Display all stored requests for some name */
-    api.get('/:name', storedRequestSearchValidation, (req, res) => {
+    api.get('/:name', nameValidation, storedRequestSearchValidation, (req, res) => {
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
@@ -40,7 +40,7 @@ export default () => {
     })
 
     /** Clear all stored requests for some name */
-    api.delete('/:name', storedRequestSearchValidation, (req, res) => {
+    api.delete('/:name', nameValidation, storedRequestSearchValidation, (req, res) => {
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()})
@@ -51,7 +51,7 @@ export default () => {
     })
 
     /** Prepare a response */
-    api.post('/:name/response', storedResponseValidation, (req, res) => {
+    api.post('/:name/response', nameValidation, storedResponseValidation, (req, res) => {
         const name = req.params.name
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
@@ -64,26 +64,30 @@ export default () => {
     })
 
     /** Receive a GET request and return the prepared response */
-    api.get('/:name/request', (req, res) => handleRequest("GET", req, res))
+    api.get('/:name/request', nameValidation, (req, res) => handleRequest("GET", req, res))
 
     /** Receive a POST request and return the prepared response */
-    api.post('/:name/request', (req, res) => handleRequest("POST", req, res))
+    api.post('/:name/request', nameValidation, (req, res) => handleRequest("POST", req, res))
 
     /** Receive a PUT request and return the prepared response */
-    api.put('/:name/request', (req, res) => handleRequest("PUT", req, res))
+    api.put('/:name/request', nameValidation, (req, res) => handleRequest("PUT", req, res))
 
     /** Receive a PATCH request and return the prepared response */
-    api.patch('/:name/request', (req, res) => handleRequest("PATCH", req, res))
+    api.patch('/:name/request', nameValidation, (req, res) => handleRequest("PATCH", req, res))
 
     /** Receive a DELETE request and return the prepared response */
-    api.delete('/:name/request', (req, res) => handleRequest("DELETE", req, res))
+    api.delete('/:name/request', nameValidation, (req, res) => handleRequest("DELETE", req, res))
 
     function handleRequest(method, req, res) {
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() })
+        }
         const name = req.params.name
         const storedRequest = {
             query: req.query,
             body: req.body,
-            headers: req.headers,
+            headers: obfuscateHeaders(req.headers),
             server_date: new Date(),
             endpoint_name: name,
             method: method
@@ -97,6 +101,22 @@ export default () => {
     }
 
     return api
+}
+
+const SENSITIVE_HEADERS = new Set(['authorization', 'cookie', 'x-api-key', 'x-auth-token'])
+const SCHEME_PREFIX_RE = /^(Bearer|Basic|Token|Digest)\s+/i
+
+function obfuscateHeaders(headers) {
+    const result = {}
+    for (const [key, value] of Object.entries(headers)) {
+        if (SENSITIVE_HEADERS.has(key.toLowerCase())) {
+            const match = SCHEME_PREFIX_RE.exec(value)
+            result[key] = match ? `${match[0]}[redacted]` : '[redacted]'
+        } else {
+            result[key] = value
+        }
+    }
+    return result
 }
 
 function makeFilter(filter) {
