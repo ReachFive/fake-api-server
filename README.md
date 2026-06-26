@@ -8,6 +8,7 @@ A stateless, in-memory fake API server for use in integration tests.
 npm install
 npm start                 # default port 1090
 PORT=3000 npm start       # custom port
+ENABLE_UI=true npm start  # enable the admin UI at /ui
 ```
 
 ## Docker
@@ -20,9 +21,14 @@ docker run -p 1090:1090 reachfive/fake-api-server
 
 ### Environment variables
 
-| Variable | Default | Description                |
-|----------|---------|----------------------------|
-| `PORT`   | `1090`  | Port the server listens on |
+| Variable     | Default | Description                          |
+|--------------|---------|--------------------------------------|
+| `PORT`       | `1090`  | Port the server listens on           |
+| `ENABLE_UI`  | _(off)_ | Set to `true` to serve the admin UI at `/ui` |
+
+```bash
+docker run -p 1090:1090 -e ENABLE_UI=true reachfive/fake-api-server
+```
 
 ### Docker Compose
 
@@ -32,6 +38,8 @@ services:
     image: reachfive/fake-api-server
     ports:
       - "1090:1090"
+    environment:
+      - ENABLE_UI=true
 ```
 
 ## Endpoints
@@ -176,3 +184,15 @@ GET /version/
 ```
 
 Returns the server version from `package.json`.
+
+---
+
+## Admin UI
+
+An optional read-only admin UI is available at `/ui`. Enable it with:
+
+```bash
+ENABLE_UI=true npm start
+```
+
+The UI lets you browse captured Twilio messages and mock requests directly in a browser. It is disabled by default and has no effect on the API.
