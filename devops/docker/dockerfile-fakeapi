@@ -9,6 +9,6 @@ COPY --chown=node:node . .
 
 USER node
 
-ENV PORT 1090
+ENV PORT=1090
 
 CMD ["npm", "start"]
