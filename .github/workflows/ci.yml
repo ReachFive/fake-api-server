@@ -8,7 +8,8 @@ on:
   workflow_call:
 
 # Deny-by-default: jobs declare only what they actually need.
-permissions: read-all
+permissions:
+  contents: read
 
 # Cancel any in-progress run for the same ref so stale runs don't
 # waste runner minutes or block merge-queue checks.
