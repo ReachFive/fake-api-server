@@ -9,6 +9,11 @@ on:
         description: "Dry run — build and scan without pushing or releasing"
         type: boolean
         default: true
+      tag:
+        description: "Version tag to publish (e.g. v1.0.0) — required when dry_run is false"
+        type: string
+        required: false
+        default: ""
 
 # Minimal default permissions — each job escalates only what it needs.
 permissions:
@@ -63,7 +68,9 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
+            type=semver,pattern={{version}},value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
+            type=semver,pattern={{major}},value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
 
       # Build locally first so Wiz can scan before anything is pushed.
       - name: Build image for scanning
