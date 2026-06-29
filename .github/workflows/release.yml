@@ -2,11 +2,11 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run — build and scan without pushing or releasing'
+        description: "Dry run — build and scan without pushing or releasing"
         type: boolean
         default: true
 
@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # full history required by Gitleaks
+          fetch-depth: 0 # full history required by Gitleaks
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -39,8 +39,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write   # upload Trivy SARIF to GitHub Security tab
-      id-token: write          # Cosign keyless signing via OIDC
+      security-events: write # upload Trivy SARIF to GitHub Security tab
+      id-token: write # Cosign keyless signing via OIDC
     outputs:
       digest: ${{ steps.push.outputs.digest }}
 
@@ -82,8 +82,8 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
-          ignore-unfixed: true   # only fail on fixable CVEs
-          exit-code: '1'
+          ignore-unfixed: true # only fail on fixable CVEs
+          exit-code: "1"
 
       # Upload even if the scan step failed so results are always visible.
       - name: Upload Trivy results to GitHub Security tab
@@ -97,7 +97,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_DEPLOYER }}
 
       # Multi-platform push with OCI SBOM + provenance attestations.
       - name: Build and push (multi-platform)
