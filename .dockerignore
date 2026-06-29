@@ -3,3 +3,7 @@ dist
 .git
 .gitignore
 *.md
+test/
+devops/
+.github/
+bin/
