@@ -39,7 +39,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write # upload Trivy SARIF to GitHub Security tab
       id-token: write # Cosign keyless signing via OIDC
     outputs:
       digest: ${{ steps.push.outputs.digest }}
@@ -63,7 +62,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
 
-      # Build locally first so Trivy can scan before anything is pushed.
+      # Build locally first so Wiz can scan before anything is pushed.
       - name: Build image for scanning
         uses: docker/build-push-action@v6
         with:
@@ -74,23 +73,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Scan image for vulnerabilities (Trivy)
-        id: trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: reachfive/fake-api-server:scan
-          format: sarif
-          output: trivy-results.sarif
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true # only fail on fixable CVEs
-          exit-code: "1"
-
-      # Upload even if the scan step failed so results are always visible.
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: trivy-results.sarif
+      - name: Scan image for vulnerabilities (Wiz)
+        run: |
+          curl -Lo wizcli https://downloads.wiz.io/wizcli/latest/wizcli-linux-amd64
+          chmod +x wizcli
+          ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
+          ./wizcli docker scan --image reachfive/fake-api-server:scan --policy "Default vulnerabilities policy"
+        env:
+          WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+          WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
 
       - name: Log in to Docker Hub
         if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
