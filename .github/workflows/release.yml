@@ -23,6 +23,7 @@ jobs:
   # ── 2. Secret scan across full git history ───────────────────────────────────
   scan-secrets:
     name: Secret scan (Gitleaks)
+    if: ${{ secrets.GITLEAKS_LICENSE != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -36,6 +37,7 @@ jobs:
   docker:
     name: Docker build, scan & push
     needs: [ci, scan-secrets]
+    if: ${{ always() && needs.ci.result == 'success' && (needs.scan-secrets.result == 'success' || needs.scan-secrets.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
